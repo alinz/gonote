@@ -5,7 +5,7 @@
 // I, Ali Najafizadeh, have modified the following code to meet my requirements.
 // You can access to the actual implementation in the following link:
 // https://golang.org/src/pkg/text/template/parse/lex.go
-package lexer
+package note
 
 import (
 	"fmt"
