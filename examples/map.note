@@ -1,2 +1,6 @@
-name: ali
-job: software
+name: - 1
+      - 2
+      - 3
+jobs: - software
+      - management
+      - programming
