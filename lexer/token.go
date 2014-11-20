@@ -2,55 +2,43 @@ package lexer
 
 import "fmt"
 
-type TokenType int
+type tokenType int
 
 const (
 	//DocStart when a new document is loaded or parsed
-	tokenDocStart TokenType = iota
-	tokenArrayStart
+	tokenDocStart tokenType = iota
+	tokenArray
 	tokenMap
-	tokenNumber
-	tokenString
-	tokenNull
-	tokenTrue
-	tokenFalse
+	tokenConstant
 	tokenSpace
 	tokenEnter
-	tokenConfig
+	tokenCommand
 	tokenError
 	tokenEnd
 )
 
-type Token struct {
-	typ TokenType
+type token struct {
+	typ tokenType
 	val string
 }
 
-func (t Token) String() string {
+func (t token) String() string {
 	tokType := ""
 	switch t.typ {
 	case tokenEnter:
 		tokType = "tokenEnter"
-	case tokenConfig:
-		tokType = "tokenConfig"
+	case tokenCommand:
+		tokType = "tokenCommand"
 	case tokenError:
 		tokType = "tokenError"
-	case tokenArrayStart:
-		tokType = "tokenArrayStart"
+	case tokenArray:
+		tokType = "tokenArray"
 	case tokenMap:
 		tokType = "tokenMap"
-	case tokenString:
-		tokType = "tokenString"
-	case tokenNull:
-		tokType = "tokenNull"
-	case tokenTrue:
-		tokType = "tokenTrue"
-	case tokenFalse:
-		tokType = "tokenFalse"
+	case tokenConstant:
+		tokType = "tokenConstant"
 	case tokenSpace:
 		tokType = "tokenSpace"
-	case tokenNumber:
-		tokType = "tokenNumber"
 	case tokenEnd:
 		tokType = "tokenEnd"
 	}

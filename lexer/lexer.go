@@ -15,7 +15,7 @@ type Lexer struct {
 	pos     int        // current position in the input.
 	width   int        // width of last rune read from input.
 	state   stateFn    // current state
-	Tokens  chan Token // channel of scanned tokens.
+	tokens  chan token // channel of scanned tokens.
 	newLine bool       // once it reaches \n becomes true
 }
 
@@ -97,8 +97,8 @@ func (l *Lexer) acceptRunUntil(notValid string) {
 }
 
 // emit emits a token based on internal pos variable
-func (l *Lexer) emit(t TokenType) {
-	l.Tokens <- Token{
+func (l *Lexer) emit(t tokenType) {
+	l.tokens <- token{
 		typ: t,
 		val: l.input[l.start:l.pos],
 	}
@@ -108,21 +108,21 @@ func (l *Lexer) emit(t TokenType) {
 // errorf returns an error token and terminates the scan by passing
 // back a nil pointer that will be the next state, terminating l.nextItem.
 func (l *Lexer) errorf(format string, args ...interface{}) stateFn {
-	l.Tokens <- Token{tokenError, fmt.Sprintf(format, args...)}
+	l.tokens <- token{tokenError, fmt.Sprintf(format, args...)}
 	return nil
 }
 
 //NextToken gets a next token
-func (l *Lexer) NextToken() Token {
+func (l *Lexer) NextToken() token {
 	for {
 		select {
-		case tok := <-l.Tokens:
+		case tok := <-l.tokens:
 			return tok
 		default:
 			if l.state != nil {
 				l.state = l.state(l)
 			} else {
-				return Token{typ: tokenEnd}
+				return token{typ: tokenEnd}
 			}
 		}
 	}
@@ -155,8 +155,8 @@ func NewLexerWithString(name, input string) *Lexer {
 	l := &Lexer{
 		name:    name,
 		input:   input,
-		state:   LexDetect,
-		Tokens:  make(chan Token, 2), // Two items sufficient.
+		state:   lexDetect,
+		tokens:  make(chan token, 2), // Two items sufficient.
 		newLine: true,
 	}
 
