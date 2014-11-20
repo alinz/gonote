@@ -132,8 +132,8 @@ func (l *Lexer) String() string {
 	return fmt.Sprintf("-name: %s\n-input: \n%s-start: %d\n-pos: %d\n-width: %d\n", l.name, l.input, l.start, l.pos, l.width)
 }
 
-func (l *Lexer) isSliceContain(lookFor rune) bool {
-	return strings.IndexRune(l.input[l.start:l.pos], lookFor) != -1
+func (l *Lexer) indexSlice(lookFor rune) int {
+	return strings.IndexRune(l.input[l.start:l.pos], lookFor)
 }
 
 //Process is a temporary call. I need to move it to Parser

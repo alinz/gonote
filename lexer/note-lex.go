@@ -65,7 +65,7 @@ func isNumber(l *Lexer) bool {
 		l.acceptRun("0123456789")
 	}
 
-	if r := l.current(); r != returnMeta {
+	if r := l.current(); r != returnMeta || r != spaceMeta {
 		return false
 	}
 
@@ -75,6 +75,8 @@ func isNumber(l *Lexer) bool {
 }
 
 func LexMap(l *Lexer) stateFn {
+	l.emit(tokenMap)
+
 	return LexDetect
 }
 
@@ -105,8 +107,11 @@ func LexConstant(l *Lexer) stateFn {
 		//is it a boolean value
 		l.emit(tokenFalse)
 	} else {
-		if l.isSliceContain(':') {
-			return LexMap
+		//string might be containing a map or maps
+		if mapPos := l.indexSlice(':'); mapPos != -1 {
+			//we need to make the pos to mapPos
+			// l.pos -= (mapPos - 1)
+			// return LexMap
 		}
 
 		//is it a string
@@ -121,11 +126,6 @@ func LexSpace(l *Lexer) stateFn {
 	l.emit(tokenSpace)
 
 	return LexDetect
-}
-
-func isContainMap(l *Lexer) bool {
-
-	return false
 }
 
 func LexDetect(l *Lexer) stateFn {
