@@ -3,11 +3,12 @@
 - ok let's do it
 - 1.02
 - false
-- 
+-
 - null
 - @import example.note
 - hello: ok
   ok: action                ok
+  null:
 
 @wow2
 @wow3

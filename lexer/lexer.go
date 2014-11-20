@@ -1,3 +1,10 @@
+// Copyright 2014, Ali Najafizadeh. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// Author: Ali Najafizadeh
+//
+// I, Ali Najafizadeh, have modified the following code to meet my requirements.
+// You can access to the actual implementation in the following link:
+// https://golang.org/src/pkg/text/template/parse/lex.go
 package lexer
 
 import (

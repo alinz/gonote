@@ -3,12 +3,12 @@ package lexer
 import "strings"
 
 const (
-	indentMeta = "\t"
-	arrayMeta  = "- "
-	spaceMeta  = ' '
-	configMeta = "@"
-	returnMeta = '\n'
-	eof        = -1
+	indentMeta  = "\t"
+	arrayMeta   = "- "
+	spaceMeta   = ' '
+	commandMeta = "@"
+	returnMeta  = '\n'
+	eof         = -1
 )
 
 func lexArrayStart(l *Lexer) stateFn {
@@ -17,8 +17,8 @@ func lexArrayStart(l *Lexer) stateFn {
 	return lexDetect
 }
 
-func lexConfig(l *Lexer) stateFn {
-	l.pos += len(configMeta)
+func lexCommand(l *Lexer) stateFn {
+	l.pos += len(commandMeta)
 	l.start = l.pos
 
 	l.acceptRunUntil("\n")
@@ -42,6 +42,16 @@ func lexEnd(l *Lexer) stateFn {
 
 func lexMap(l *Lexer) stateFn {
 	l.emit(tokenMap)
+	//these two increament skip the `:` chars
+	l.pos++
+	l.start++
+
+	//ignore spaces
+	//for example
+	//name:     john
+	//we don't want to parse spaces between `:` and `john`
+	l.acceptRun(" ")
+	l.ignore()
 
 	return lexDetect
 }
@@ -52,7 +62,8 @@ func lexMapOrConstant(l *Lexer) stateFn {
 	//string might be containing a map or maps
 	if mapPos := l.indexSlice(':'); mapPos != -1 {
 		//we need to make the pos to mapPos
-		l.pos -= (mapPos - 1)
+		//log(l)
+		l.pos = l.start + mapPos
 		return lexMap
 	}
 
@@ -72,8 +83,8 @@ func lexSpace(l *Lexer) stateFn {
 func lexDetect(l *Lexer) stateFn {
 	for {
 		//@
-		if l.newLine && strings.HasPrefix(l.input[l.pos:], configMeta) {
-			return lexConfig
+		if l.newLine && strings.HasPrefix(l.input[l.pos:], commandMeta) {
+			return lexCommand
 		}
 
 		//array
