@@ -1,0 +1,79 @@
+DOC_START
+DOC_END
+
+MAP_START
+MAP_KEY
+MAP_END
+
+ARRAY_START
+ARRAY_END
+
+VALUE_BOOLEAN
+VALUE_NULL
+VALUE_NUMBER
+VALUE_STRING
+
+VALUE_EXTENSION
+
+
+
+title: My Awesome Project
+types:
+  - aaaaa aaaaaaa
+    aaaaa aaaaaaa
+
+
+Advanced Primitives
+  Map
+      <key>: <value>
+  Array
+      - <value>
+
+
+Basic Primitives
+
+  Boolean
+      True | False
+  Null
+      nil
+  Number
+      1 | 0.1 | 0x2222
+  String
+      <any chars>
+  !! extension
+
+
+
+Spec
+Every document is a map object
+
+key and value MUST separated by colleen (:)
+
+if value is an array, it should start at new line
+
+array MUST starts with dash follow by a space.
+the value of array could be any type defines
+
+comment: after # everthing else will be removed and not parseable until end of line
+
+Boolean (True), (False)
+Null (nil)
+Number
+String
+
+
+Array (- )
+Map (.*):
+!! extension operation
+
+
+
+
+lexer
+
+lexDetectValue
+  if value is Boolean
+    emit boolean
+    retrun lexDetectValue
+  else
+    

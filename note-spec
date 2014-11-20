@@ -1,0 +1,87 @@
+Note
+Note is a new way of structure data which closes to human brain.
+It supports 2 types of values.
+
+  1: Simple
+    Number
+    String - empty string considers null
+    null
+    true | false
+    import: !!
+
+  2: Complex
+    Map
+      except : and -, anything can be consider as key.
+    Array
+
+This data structure is indented.
+
+Here are some examples
+
+#Map of array
+
+names:
+  - John
+  - Mary
+  - etc
+Locations:
+  - NYC
+  - LA
+
+#Map of Map
+
+Locations:
+  country: USA
+  city: NYC
+
+# Map of constants
+
+PI: 3.14
+counter: 1
+isAccessable: false
+
+# string can be splited into multiple lines as long as the first line doesn't have
+# colean or starts with (- + space)
+
+message:
+  is simply dummy text of the printing and typesetting industry.
+  Lorem Ipsum has been the industry's standard dummy text ever since the 1500s,
+  when an unknown printer took a galley of type and scrambled it
+  to make a type specimen book.
+  It has survived not only five centuries, but also the leap
+  into electronic typesetting, remaining essentially unchanged.
+  It was popularised in the 1960s with the release of Letraset sheets
+  containing Lorem Ipsum passages, and more recently with desktop publishing
+  software like Aldus PageMaker including versions of Lorem Ipsum.
+
+
+
+
+
+- hello: ok
+  ok: action
+
+@space
+
+- - ok
+  - ok
+  -
+- - ok
+
+
+ok: - ok
+      wow
+    - wow
+    - yes
+
+ok: ok: wow
+    nice: fsufruhruh - auhafjsf
+
+
+ok: ok: ok: wow
+        hot: nice
+    nice to have: nice
+
+- :
+
+nice: -
