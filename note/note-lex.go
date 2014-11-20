@@ -4,12 +4,15 @@
 
 package note
 
-import "strings"
+import (
+	"strconv"
+	"strings"
+)
 
 const (
-	indentMeta  = "\t"
-	arrayMeta   = "- "
+	arrayMeta   = "-"
 	spaceMeta   = ' '
+	mapMeta     = ':'
 	commandMeta = "@"
 	returnMeta  = '\n'
 	eof         = -1
@@ -18,6 +21,13 @@ const (
 func lexArrayStart(l *Lexer) stateFn {
 	l.pos += len(arrayMeta)
 	l.emit(tokenArray)
+
+	//we are ignoring spaces after an array is found
+	l.acceptRun(strconv.QuoteRuneToASCII(spaceMeta))
+	l.ignore()
+
+	l.newArray = true
+
 	return lexDetect
 }
 
@@ -54,8 +64,10 @@ func lexMap(l *Lexer) stateFn {
 	//for example
 	//name:     john
 	//we don't want to parse spaces between `:` and `john`
-	l.acceptRun(" ")
+	l.acceptRun(strconv.QuoteRuneToASCII(spaceMeta))
 	l.ignore()
+
+	l.newMap = true
 
 	return lexDetect
 }
@@ -64,9 +76,9 @@ func lexMapOrConstant(l *Lexer) stateFn {
 	l.acceptRunUntil("\n")
 
 	//string might be containing a map or maps
-	if mapPos := l.indexSlice(':'); mapPos != -1 {
-		//we need to make the pos to mapPos
-		//log(l)
+	if mapPos := l.indexSlice(mapMeta); mapPos != -1 {
+		//we need since mapPos is the index from slice,
+		//we need to add to add it to l.start to find the new pos
 		l.pos = l.start + mapPos
 		return lexMap
 	}
@@ -78,7 +90,7 @@ func lexMapOrConstant(l *Lexer) stateFn {
 }
 
 func lexSpace(l *Lexer) stateFn {
-	l.acceptRun(" ")
+	l.acceptRun(strconv.QuoteRuneToASCII(spaceMeta))
 	l.emit(tokenSpace)
 
 	return lexDetect
@@ -86,8 +98,9 @@ func lexSpace(l *Lexer) stateFn {
 
 func lexDetect(l *Lexer) stateFn {
 	for {
-		//@
-		if l.newLine && strings.HasPrefix(l.input[l.pos:], commandMeta) {
+		//command
+		if (l.newLine || l.newArray || l.newMap) &&
+			strings.HasPrefix(l.input[l.pos:], commandMeta) {
 			return lexCommand
 		}
 
@@ -97,6 +110,8 @@ func lexDetect(l *Lexer) stateFn {
 		}
 
 		l.newLine = false
+		l.newArray = false
+		l.newMap = false
 
 		switch r := l.next(); {
 		case r == eof:

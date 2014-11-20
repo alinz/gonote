@@ -4,3 +4,9 @@ name: - 1
 jobs: - software
       - management
       - programming
+      - complexJobs: - ceo
+                     - cto
+      - access: @import hello.message
+      - email: ali@ali.com
+      - @import hello.message
+@import hello.message

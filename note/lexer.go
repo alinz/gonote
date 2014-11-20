@@ -17,14 +17,16 @@ import (
 
 // Lexer holds the state of the scanner.
 type Lexer struct {
-	name    string     // used only for error reports.
-	input   string     // the buffer reader to string content.
-	start   int        // start position of this item.
-	pos     int        // current position in the input.
-	width   int        // width of last rune read from input.
-	state   stateFn    // current state
-	tokens  chan token // channel of scanned tokens.
-	newLine bool       // once it reaches \n becomes true
+	name     string     // used only for error reports.
+	input    string     // the buffer reader to string content.
+	start    int        // start position of this item.
+	pos      int        // current position in the input.
+	width    int        // width of last rune read from input.
+	state    stateFn    // current state
+	tokens   chan token // channel of scanned tokens.
+	newLine  bool       // once it reaches \n becomes true
+	newArray bool       // once it reaches an array it becomes true
+	newMap   bool       // once it reaches a map it becomes true
 }
 
 type stateFn func(*Lexer) stateFn
