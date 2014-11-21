@@ -11,6 +11,7 @@ package note
 import (
 	"fmt"
 	"io/ioutil"
+	"net/http"
 	"strings"
 	"unicode/utf8"
 )
@@ -176,10 +177,26 @@ func NewLexerWithString(name, input string) *Lexer {
 	return l
 }
 
-// NewLexerWithFilename create a lexer based on the file
-func NewLexerWithFilename(name, input string) *Lexer {
+//NewLexerWithFilename create a lexer based on the file
+func NewLexerWithFilename(name, input string) (lexer *Lexer, err error) {
 	buf, err := ioutil.ReadFile(input)
-	checkError(err)
+	lexer = NewLexerWithString(name, string(buf))
+	return
+}
 
-	return NewLexerWithString(name, string(buf))
+//NewLexerWithURI loads data from HTTP server
+func NewLexerWithURI(name, uri string) (lexer *Lexer, err error) {
+	lexer = nil
+	resp, err := http.Get(uri)
+
+	if err != nil {
+		return
+	}
+
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	lexer = NewLexerWithString(name, string(body))
+
+	return
 }
