@@ -14,8 +14,9 @@ import (
 //Parser the parser implemenation for note
 type Parser struct {
 	//we are using stack since note file can be read from other file or network.
-	lexers util.Stack
-	tree   *Node
+	lexers       util.Stack
+	currentLexer *Lexer
+	tree         *Node
 }
 
 //LoadFile load a file based on local or network
@@ -46,7 +47,8 @@ func (p *Parser) doParse() {
 
 	if exists && item != nil {
 		for {
-			lexer := (item).(Lexer)
+			lexer := (item).(*Lexer)
+			p.currentLexer = lexer
 			tok := lexer.NextToken()
 
 			p.process(tok)
@@ -61,6 +63,15 @@ func (p *Parser) doParse() {
 }
 
 func (p *Parser) process(tok token) {
+
+	switch {
+	case tok.typ == tokenCommand:
+		//push the current lexer to stack
+		p.lexers.Push(p.currentLexer)
+		//load the new requested file
+		p.LoadFile("")
+	}
+
 	fmt.Println(tok)
 }
 
