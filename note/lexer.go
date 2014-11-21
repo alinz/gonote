@@ -150,20 +150,6 @@ func (l *Lexer) indexSlice(lookFor rune) int {
 	return strings.IndexRune(l.input[l.start:l.pos], lookFor)
 }
 
-//Process is a temporary call. I need to move it to Parser
-func (l *Lexer) Process() {
-	for {
-		token := l.NextToken()
-
-		fmt.Println(token)
-
-		if token.typ == tokenEnd || token.typ == tokenError {
-			break
-		}
-
-	}
-}
-
 //NewLexerWithString creates lexer based on string
 func NewLexerWithString(name, input string) *Lexer {
 	l := &Lexer{
