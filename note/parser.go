@@ -46,33 +46,46 @@ func (p *Parser) doParse() {
 	item, exists := p.lexers.Pop()
 
 	if exists && item != nil {
+		lexer := (item).(*Lexer)
+		p.currentLexer = lexer
 		for {
-			lexer := (item).(*Lexer)
-			p.currentLexer = lexer
+			if p.currentLexer == nil {
+				break
+			}
+
 			tok := lexer.NextToken()
 
 			p.process(tok)
-
-			if tok.typ == tokenEnd {
-				break
-			} else if tok.typ == tokenError {
-				panic(tokenError)
-			}
 		}
 	}
 }
 
-func (p *Parser) process(tok token) {
+func (p *Parser) processCommand(tok token) {
+	if strings.HasPrefix(tok.val, "import ") {
+		if segments := strings.Split(tok.val, " "); len(segments) == 2 {
+			//push the current lexer to stack
+			p.lexers.Push(p.currentLexer)
+			//load the new requested file
+			p.LoadFile(segments[1])
+		} else {
+			panic("import error: " + tok.val)
+		}
+	} else {
+		panic("unknown command: " + tok.val)
+	}
+}
 
+func (p *Parser) process(tok token) {
 	switch {
 	case tok.typ == tokenCommand:
-		//push the current lexer to stack
-		p.lexers.Push(p.currentLexer)
-		//load the new requested file
-		p.LoadFile("")
+		p.processCommand(tok)
+	case tok.typ == tokenEnd:
+		p.currentLexer = nil
+	case tok.typ == tokenError:
+		panic(tok)
+	default:
+		fmt.Println(tok)
 	}
-
-	fmt.Println(tok)
 }
 
 //Tree returns the root to parse tree
