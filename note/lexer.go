@@ -186,3 +186,15 @@ func NewLexerWithURI(name, uri string) (lexer *Lexer, err error) {
 
 	return
 }
+
+//NewLexerWithPath loads note content from URI or local file system
+func NewLexerWithPath(name, path string) (lexer *Lexer, err error) {
+	//check whether path contains http
+	if lowerCasePath := strings.ToLower(path); strings.HasPrefix(lowerCasePath, "http://") ||
+		strings.HasPrefix(lowerCasePath, "https://") {
+		lexer, err = NewLexerWithURI(path, path)
+	} else {
+		lexer, err = NewLexerWithFilename(path, path)
+	}
+	return
+}

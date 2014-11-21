@@ -20,18 +20,11 @@ type Parser struct {
 }
 
 //LoadFile load a file based on local or network
-//path can be file on local or network using http
 func (p *Parser) LoadFile(path string) {
 	var err error
 	var lexer *Lexer
 
-	//check whether path contains http
-	if lowerCasePath := strings.ToLower(path); strings.HasPrefix(lowerCasePath, "http://") ||
-		strings.HasPrefix(lowerCasePath, "https://") {
-		lexer, err = NewLexerWithURI(path, path)
-	} else {
-		lexer, err = NewLexerWithFilename(path, path)
-	}
+	lexer, err = NewLexerWithPath(path, path)
 
 	if err != nil {
 		panic(err)
@@ -43,11 +36,16 @@ func (p *Parser) LoadFile(path string) {
 }
 
 func (p *Parser) doParse() {
-	item, exists := p.lexers.Pop()
+	for {
+		item, exists := p.lexers.Pop()
 
-	if exists && item != nil {
+		if !exists || item == nil {
+			break
+		}
+
 		lexer := (item).(*Lexer)
 		p.currentLexer = lexer
+
 		for {
 			if p.currentLexer == nil {
 				break
