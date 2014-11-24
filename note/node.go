@@ -4,6 +4,8 @@
 
 package note
 
+import "fmt"
+
 //NodeType is a type that defines all node types
 type NodeType int
 
@@ -29,7 +31,7 @@ type Node interface {
 
 //NodeMap is a map node
 type NodeMap struct {
-	Value map[string]*Node
+	Value map[string]Node
 	level int //level indicates the number of indentation
 }
 
@@ -44,7 +46,7 @@ func (nm *NodeMap) unexported() {
 //NewNodeMap creates an empty NodeMap
 func NewNodeMap() *NodeMap {
 	return &NodeMap{
-		Value: make(map[string]*Node),
+		Value: make(map[string]Node),
 		level: 0,
 	}
 }
@@ -55,7 +57,7 @@ func NewNodeMap() *NodeMap {
 
 //NodeArray is an array node
 type NodeArray struct {
-	Value []*Node
+	Value []Node
 	level int //level indicates the number of indentation
 }
 
@@ -68,14 +70,18 @@ func (na *NodeArray) unexported() {
 }
 
 //Append appends a new node to array
-func (na *NodeArray) Append(node *Node) {
+func (na *NodeArray) Append(node Node) {
 	na.Value = append(na.Value, node)
+}
+
+func (na NodeArray) String() string {
+	return fmt.Sprintf("%v", na.Value)
 }
 
 //NewNodeArray creates an empty NodeArray with cap of 5
 func NewNodeArray() *NodeArray {
 	return &NodeArray{
-		Value: make([]*Node, 5),
+		Value: make([]Node, 0, 5),
 		level: 0,
 	}
 }
@@ -95,6 +101,10 @@ func (nc *NodeConstant) Type() NodeType {
 }
 
 func (nc *NodeConstant) unexported() {
+}
+
+func (nc NodeConstant) String() string {
+	return fmt.Sprintf("%v", nc.Value)
 }
 
 //NewNodeConstant creates a new node
