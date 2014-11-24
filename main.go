@@ -20,4 +20,6 @@ func main() {
 		usage()
 	}
 	p.LoadFile(os.Args[1])
+
+	fmt.Println(p.Tree())
 }

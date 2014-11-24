@@ -90,7 +90,6 @@ func (p *Parser) process(tok token) {
 		a := (p.currentNode).(*NodeArray)
 		a.Append(NewNodeConstant(tok.val))
 		//log((NewNodeConstant(tok.val))
-		log(*p)
 
 	case tok.typ == tokenEnter:
 		p.indentation = 0
@@ -133,12 +132,16 @@ func (p *Parser) getCurrentNode(nodeType NodeType) (node Node, err error) {
 		}
 	}
 
+	if p.tree == nil {
+		p.tree = node
+	}
+
 	return
 }
 
 //Tree returns the root to parse tree
-func (p *Parser) Tree() *Node {
-	return nil
+func (p *Parser) Tree() Node {
+	return p.tree
 }
 
 //NewParser creates a new Parser
