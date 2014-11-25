@@ -80,7 +80,7 @@ func (p *Parser) processCommand(tok token) {
 func (p *Parser) process(tok token) {
 	switch {
 	case tok.typ == tokenArray:
-		p.indentation++
+		p.indentation += len(tok.val)
 		if err := p.currentNode(NodeArrayType); err != nil {
 			panic(err)
 		}
@@ -111,6 +111,8 @@ func (p *Parser) process(tok token) {
 func (p *Parser) currentNode(nodeType NodeType) (err error) {
 	err = nil
 
+	//get the node from indentation
+	//it can be nil
 	node, ok := p.nodeIndexMap[p.indentation]
 
 	if ok {
@@ -121,6 +123,7 @@ func (p *Parser) currentNode(nodeType NodeType) (err error) {
 		switch nodeType {
 		case NodeArrayType:
 			node = NewNodeArray()
+			p.addToNode(node)
 		case NodeMapType:
 			node = NewNodeMap()
 		default:
@@ -132,9 +135,24 @@ func (p *Parser) currentNode(nodeType NodeType) (err error) {
 		p.tree = node
 	}
 
+	p.nodeIndexMap[p.indentation] = node
+
 	p.current = node
 
 	return
+}
+
+func (p *Parser) addToNode(node Node) {
+	if p.current != nil {
+		switch p.current.Type() {
+		case NodeArrayType:
+			(p.current).(*NodeArray).Append(node)
+		case NodeMapType:
+			panic("not implemented yet")
+		default:
+			panic("something went seriously wrong")
+		}
+	}
 }
 
 //Tree returns the root to parse tree
