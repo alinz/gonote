@@ -78,30 +78,30 @@ func (p *Parser) processCommand(tok token) {
 }
 
 func (p *Parser) process(tok token) {
-	switch {
-	case tok.typ == tokenArray:
+	switch tok.typ {
+	case tokenArray:
 		p.indentation += len(tok.val)
 		if err := p.currentNode(NodeArrayType); err != nil {
 			panic(err)
 		}
 
-	case tok.typ == tokenConstant:
+	case tokenConstant:
 		a := (p.current).(*NodeArray)
 		a.Append(NewNodeConstant(tok.val))
 
-	case tok.typ == tokenEnter:
+	case tokenEnter:
 		p.indentation = 0
-	case tok.typ == tokenSpace:
+	case tokenSpace:
 		p.indentation += len(tok.val)
 
 	//Need to rethink about the below operation
 	//
 	//
-	case tok.typ == tokenCommand:
+	case tokenCommand:
 		p.processCommand(tok)
-	case tok.typ == tokenEnd:
+	case tokenEnd:
 		p.currentLexer = nil
-	case tok.typ == tokenError:
+	case tokenError:
 		panic(tok)
 	default:
 		fmt.Println(tok)
