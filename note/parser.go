@@ -18,7 +18,7 @@ type Parser struct {
 	lexers       util.Stack
 	currentLexer *Lexer       //holds the current active lexer
 	tree         Node         //holds the root of parse tree
-	currentNode  Node         //holds the pointer of current node
+	current      Node         //holds the pointer of current node
 	indentation  int          //keeps track of current indentation
 	nodeIndexMap map[int]Node //the key holds the number of indentation
 }
@@ -80,22 +80,23 @@ func (p *Parser) processCommand(tok token) {
 func (p *Parser) process(tok token) {
 	switch {
 	case tok.typ == tokenArray:
-		if node, err := p.getCurrentNode(NodeArrayType); err == nil {
-			p.currentNode = node
-		} else {
+		p.indentation++
+		if err := p.currentNode(NodeArrayType); err != nil {
 			panic(err)
 		}
 
 	case tok.typ == tokenConstant:
-		a := (p.currentNode).(*NodeArray)
+		a := (p.current).(*NodeArray)
 		a.Append(NewNodeConstant(tok.val))
-		//log((NewNodeConstant(tok.val))
 
 	case tok.typ == tokenEnter:
 		p.indentation = 0
 	case tok.typ == tokenSpace:
 		p.indentation += len(tok.val)
 
+	//Need to rethink about the below operation
+	//
+	//
 	case tok.typ == tokenCommand:
 		p.processCommand(tok)
 	case tok.typ == tokenEnd:
@@ -107,34 +108,31 @@ func (p *Parser) process(tok token) {
 	}
 }
 
-func (p *Parser) getCurrentNode(nodeType NodeType) (node Node, err error) {
+func (p *Parser) currentNode(nodeType NodeType) (err error) {
 	err = nil
+
 	node, ok := p.nodeIndexMap[p.indentation]
+
 	if ok {
 		if node.Type() != nodeType {
-			node = nil
 			err = errors.New("wrong indentation object")
 		}
 	} else {
-
 		switch nodeType {
+		case NodeArrayType:
+			node = NewNodeArray()
 		case NodeMapType:
 			node = NewNodeMap()
-		case NodeArrayType:
-			log("create a new array")
-			node = NewNodeArray()
 		default:
-			err = errors.New("node can not be created as a constant node")
-		}
-
-		if err == nil {
-			p.nodeIndexMap[p.indentation] = node
+			err = errors.New("current node can not be a constant node")
 		}
 	}
 
 	if p.tree == nil {
 		p.tree = node
 	}
+
+	p.current = node
 
 	return
 }
