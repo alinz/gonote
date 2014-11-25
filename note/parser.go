@@ -84,6 +84,11 @@ func (p *Parser) process(tok token) {
 		if err := p.currentNode(NodeArrayType); err != nil {
 			panic(err)
 		}
+	case tokenMap:
+		//we have to delete the map object from indentation once it's done. somehow!
+		if err := p.currentNode(NodeMapType); err != nil {
+			panic(err)
+		}
 
 	case tokenConstant:
 		a := (p.current).(*NodeArray)
@@ -114,6 +119,8 @@ func (p *Parser) currentNode(nodeType NodeType) (err error) {
 	//get the node from indentation
 	//it can be nil
 	node, ok := p.nodeIndexMap[p.indentation]
+
+	log(node)
 
 	if ok {
 		if node.Type() != nodeType {
