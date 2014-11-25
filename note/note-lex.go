@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	arrayMeta   = "-"
+	arrayMeta   = "- "
 	spaceMeta   = ' '
 	mapMeta     = ':'
 	commandMeta = "@"
