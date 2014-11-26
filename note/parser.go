@@ -117,28 +117,44 @@ func (p *Parser) process(tok token) {
 	}
 }
 
+/*
+p.nodes.Push(&nodeExtra{
+node:        node,
+indentation: p.indentation,
+})
+*/
+
 func (p *Parser) currentNode(nodeType NodeType) {
-	if p.current == nil {
-		node := p.makeNode(nodeType)
+	if p.tree == nil {
+		node := p.makeNode(NodeArrayType)
+		p.tree = node
 		p.current = node
+
 		p.nodes.Push(&nodeExtra{
 			node:        node,
 			indentation: p.indentation,
 		})
-		p.setupRoot(node)
 	} else {
-		for {
-			temp, exists := p.nodes.Pop()
-			if !exists {
-				p.current = nil
-				break
-			}
 
-			if ptr := (temp).(*nodeExtra); ptr.node.Type() == nodeType && ptr.indentation == p.indentation {
-				p.current = ptr.node
-				p.nodes.Push(temp)
-				break
-			}
+		peek, exists := p.nodes.Peek()
+		peekNodeExtra := (peek).(*nodeExtra)
+
+		if !exists {
+			p.current = nil
+		} else if peekNodeExtra.indentation == p.indentation {
+			p.current = peekNodeExtra.node
+		} else if peekNodeExtra.indentation < p.indentation {
+			node := p.makeNode(NodeArrayType)
+			p.addNodeToCurrent(node)
+			p.current = node
+
+			p.nodes.Push(&nodeExtra{
+				node:        node,
+				indentation: p.indentation,
+			})
+		} else if peekNodeExtra.indentation > p.indentation {
+			p.nodes.Pop()
+			p.currentNode(nodeType)
 		}
 	}
 }
@@ -172,12 +188,6 @@ func (p *Parser) addNodeToCurrent(node Node) {
 
 	} else {
 		panic("current pointer is null")
-	}
-}
-
-func (p *Parser) setupRoot(node Node) {
-	if p.tree == nil {
-		p.tree = node
 	}
 }
 
