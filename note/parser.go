@@ -5,22 +5,27 @@
 package note
 
 import (
-	"errors"
 	"fmt"
 	"strings"
 
 	"github.com/alinz/gonote/note/util"
 )
 
+type nodeExtra struct {
+	node        Node
+	indentation int
+}
+
 //Parser the parser implemenation for note
 type Parser struct {
 	//we are using stack since note file can be read from other file or network.
 	lexers       util.Stack
-	currentLexer *Lexer       //holds the current active lexer
-	tree         Node         //holds the root of parse tree
-	current      Node         //holds the pointer of current node
-	indentation  int          //keeps track of current indentation
-	nodeIndexMap map[int]Node //the key holds the number of indentation
+	currentLexer *Lexer     //holds the current active lexer
+	tree         Node       //holds the root of parse tree
+	current      Node       //holds the pointer of current node
+	indentation  int        //keeps track of current indentation
+	nodes        util.Stack //stores processed node in stack
+	lastKeyMap   string
 }
 
 //LoadFile load a file based on local or network
@@ -78,87 +83,101 @@ func (p *Parser) processCommand(tok token) {
 }
 
 func (p *Parser) process(tok token) {
+	log(tok)
 	switch tok.typ {
 	case tokenArray:
 		p.indentation += len(tok.val)
-		if err := p.currentNode(NodeArrayType); err != nil {
-			panic(err)
-		}
+		p.currentNode(NodeArrayType)
+
 	case tokenMap:
-		//we have to delete the map object from indentation once it's done. somehow!
-		if err := p.currentNode(NodeMapType); err != nil {
-			panic(err)
-		}
+		p.lastKeyMap = tok.val
+		p.currentNode(NodeMapType)
 
 	case tokenConstant:
-		a := (p.current).(*NodeArray)
-		a.Append(NewNodeConstant(tok.val))
+		node := NewNodeConstant(tok.val)
+		p.addNodeToCurrent(node)
 
 	case tokenEnter:
 		p.indentation = 0
+
 	case tokenSpace:
 		p.indentation += len(tok.val)
 
-	//Need to rethink about the below operation
-	//
-	//
 	case tokenCommand:
 		p.processCommand(tok)
+
 	case tokenEnd:
 		p.currentLexer = nil
+
 	case tokenError:
 		panic(tok)
+
 	default:
 		fmt.Println(tok)
 	}
 }
 
-func (p *Parser) currentNode(nodeType NodeType) (err error) {
-	err = nil
-
-	//get the node from indentation
-	//it can be nil
-	node, ok := p.nodeIndexMap[p.indentation]
-
-	log(node)
-
-	if ok {
-		if node.Type() != nodeType {
-			err = errors.New("wrong indentation object")
-		}
+func (p *Parser) currentNode(nodeType NodeType) {
+	if p.current == nil {
+		node := p.makeNode(nodeType)
+		p.current = node
+		p.nodes.Push(&nodeExtra{
+			node:        node,
+			indentation: p.indentation,
+		})
+		p.setupRoot(node)
 	} else {
-		switch nodeType {
-		case NodeArrayType:
-			node = NewNodeArray()
-			p.addToNode(node)
-		case NodeMapType:
-			node = NewNodeMap()
-		default:
-			err = errors.New("current node can not be a constant node")
+		for {
+			temp, exists := p.nodes.Pop()
+			if !exists {
+				p.current = nil
+				break
+			}
+
+			if ptr := (temp).(*nodeExtra); ptr.node.Type() == nodeType && ptr.indentation == p.indentation {
+				p.current = ptr.node
+				p.nodes.Push(temp)
+				break
+			}
 		}
 	}
+}
 
-	if p.tree == nil {
-		p.tree = node
+func (p *Parser) makeNode(nodeType NodeType) (node Node) {
+	switch nodeType {
+	case NodeArrayType:
+		node = NewNodeArray()
+	case NodeMapType:
+		node = NewNodeMap()
+	case NodeConstantType:
+		panic("can not create a complex node")
 	}
-
-	p.nodeIndexMap[p.indentation] = node
-
-	p.current = node
-
 	return
 }
 
-func (p *Parser) addToNode(node Node) {
-	if p.current != nil {
+func (p *Parser) addNodeToCurrent(node Node) {
+	if p.tree == nil {
+		p.tree = node
+		p.current = node
+	} else if p.current != nil {
+
 		switch p.current.Type() {
 		case NodeArrayType:
-			(p.current).(*NodeArray).Append(node)
+			((p.current).(*NodeArray)).Append(node)
 		case NodeMapType:
-			panic("not implemented yet")
-		default:
-			panic("something went seriously wrong")
+			((p.current).(*NodeMap)).Put(p.lastKeyMap, node)
+		case NodeConstantType:
+			panic("can not change/add the constant node.")
 		}
+
+	} else {
+		panic("current pointer is null")
+	}
+}
+
+func (p *Parser) setupRoot(node Node) {
+	if p.tree == nil {
+		p.tree = node
 	}
 }
 
@@ -169,7 +188,5 @@ func (p *Parser) Tree() Node {
 
 //NewParser creates a new Parser
 func NewParser() *Parser {
-	return &Parser{
-		nodeIndexMap: make(map[int]Node),
-	}
+	return &Parser{}
 }

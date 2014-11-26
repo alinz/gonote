@@ -32,7 +32,6 @@ type Node interface {
 //NodeMap is a map node
 type NodeMap struct {
 	Value map[string]Node
-	level int //level indicates the number of indentation
 }
 
 //Type returns the type of node which is NodeMapType
@@ -43,11 +42,15 @@ func (nm *NodeMap) Type() NodeType {
 func (nm *NodeMap) unexported() {
 }
 
+//Put puts value into map
+func (nm *NodeMap) Put(key string, value Node) {
+	nm.Value[key] = value
+}
+
 //NewNodeMap creates an empty NodeMap
 func NewNodeMap() *NodeMap {
 	return &NodeMap{
 		Value: make(map[string]Node),
-		level: 0,
 	}
 }
 
@@ -58,7 +61,6 @@ func NewNodeMap() *NodeMap {
 //NodeArray is an array node
 type NodeArray struct {
 	Value []Node
-	level int //level indicates the number of indentation
 }
 
 //Type returns the type of node which is NodeMapType
@@ -82,7 +84,6 @@ func (na NodeArray) String() string {
 func NewNodeArray() *NodeArray {
 	return &NodeArray{
 		Value: make([]Node, 0, 5),
-		level: 0,
 	}
 }
 
